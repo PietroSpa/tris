@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="tic_tac_toe.png" type="image/png" />
+  </head>
+  <body>
+    <div class="turn-container">
+      <h3>Turno di</h3>
+      <div class="turn-box align">X</div>
+      <div class="turn-box align">O</div>
+      <div class="bg"></div>
+    </div>
+    <h1 id="win">TU [ 0 -- 0 ] CPU</h1>
+
+    <div class="main-grid">
+      <div class="box align" data-index="0"></div>
+      <div class="box align" data-index="1"></div>
+      <div class="box align" data-index="2"></div>
+      <div class="box align" data-index="3"></div>
+      <div class="box align" data-index="4"></div>
+      <div class="box align" data-index="5"></div>
+      <div class="box align" data-index="6"></div>
+      <div class="box align" data-index="7"></div>
+      <div class="box align" data-index="8"></div>
+    </div>
+
+    <h2 id="results"></h2>
+    <button id="play-again">Play Again</button>
+
+    <script src="script.js"></script>
+  </body>
+</html>
