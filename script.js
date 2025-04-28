@@ -16,10 +16,22 @@ const winConditions = [
   [2, 4, 6],
 ];
 
+// Carica punteggio da localStorage
+function loadScore() {
+  player1 = parseInt(localStorage.getItem("player1")) || 0;
+  player2 = parseInt(localStorage.getItem("player2")) || 0;
+}
+
+// Salva punteggio su localStorage
+function saveScore() {
+  localStorage.setItem("player1", player1);
+  localStorage.setItem("player2", player2);
+}
+
+// Aggiorna punteggio a schermo e salva
 function updateScore() {
-  document.querySelector(
-    "#win"
-  ).textContent = `TU [ ${player1} -- ${player2} ] CPU`;
+  document.querySelector("#win").textContent = `TU [ ${player1} -- ${player2} ] CPU`;
+  saveScore();
 }
 
 function checkWin() {
@@ -66,39 +78,92 @@ function changeTurn() {
   document.querySelector(".bg").style.left = turn === "X" ? "0" : "85px";
 }
 
+// Giocata della CPU usando Minimax
 function playCPUMove() {
   if (isGameOver) return;
 
-  const available = [...boxes].filter((b) => b.textContent === "");
-  if (available.length === 0) return;
+  const bestMove = findBestMove();
+  if (bestMove !== -1) {
+    boxes[bestMove].textContent = turn;
+    checkWin();
+    checkDraw();
+    changeTurn();
+  }
+}
 
-  for (const condition of winConditions) {
-    const [a, b, c] = condition;
-    const line = [boxes[a], boxes[b], boxes[c]];
-    const values = line.map((box) => box.textContent);
-    const emptyIndices = [a, b, c].filter((i) => boxes[i].textContent === "");
-
-    const scoreMap = { X: 5, O: 3, "": 1 };
-    const product = values.reduce((acc, val) => acc * scoreMap[val], 1);
-
-    if (
-      (product === 9 || product === 25 || product === 3) &&
-      emptyIndices.length > 0
-    ) {
-      boxes[emptyIndices[0]].textContent = turn;
-      checkWin();
-      checkDraw();
-      changeTurn();
-      return;
-    }
+// Algoritmo Minimax
+function minimax(depth, isMaximizing) {
+  const winner = getWinner();
+  if (winner !== null) {
+    if (winner === "O") return 10 - depth;
+    if (winner === "X") return depth - 10;
+    return 0;
   }
 
-  const randomBox = available[Math.floor(Math.random() * available.length)];
-  randomBox.textContent = turn;
-  checkWin();
-  checkDraw();
-  changeTurn();
+  if (isMaximizing) {
+    let bestScore = -Infinity;
+    boxes.forEach((box) => {
+      if (box.textContent === "") {
+        box.textContent = "O";
+        const score = minimax(depth + 1, false);
+        box.textContent = "";
+        bestScore = Math.max(score, bestScore);
+      }
+    });
+    return bestScore;
+  } else {
+    let bestScore = Infinity;
+    boxes.forEach((box) => {
+      if (box.textContent === "") {
+        box.textContent = "X";
+        const score = minimax(depth + 1, true);
+        box.textContent = "";
+        bestScore = Math.min(score, bestScore);
+      }
+    });
+    return bestScore;
+  }
 }
+
+// Trova la miglior mossa possibile
+function findBestMove() {
+  let bestScore = -Infinity;
+  let move = -1;
+  boxes.forEach((box, index) => {
+    if (box.textContent === "") {
+      box.textContent = "O";
+      const score = minimax(0, false);
+      box.textContent = "";
+      if (score > bestScore) {
+        bestScore = score;
+        move = index;
+      }
+    }
+  });
+  return move;
+}
+
+// Ritorna "X", "O", "Draw" o null
+function getWinner() {
+  for (const condition of winConditions) {
+    const [a, b, c] = condition;
+    const v0 = boxes[a].textContent;
+    const v1 = boxes[b].textContent;
+    const v2 = boxes[c].textContent;
+
+    if (v0 && v0 === v1 && v0 === v2) {
+      return v0;
+    }
+  }
+  if ([...boxes].every((b) => b.textContent !== "")) {
+    return "Draw";
+  }
+  return null;
+}
+
+// Inizializzazione
+loadScore();
+updateScore();
 
 boxes.forEach((box) => {
   box.textContent = "";
@@ -110,7 +175,7 @@ boxes.forEach((box) => {
       changeTurn();
       setTimeout(() => {
         if (!isGameOver) playCPUMove();
-      }, 500);
+      }, 300); // CPU gioca dopo piccolo delay
     }
   });
 });
